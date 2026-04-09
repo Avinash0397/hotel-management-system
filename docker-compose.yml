@@ -1,0 +1,182 @@
+services:
+
+  # ─── PostgreSQL ───────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: hotel-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Auth Service (8081) ──────────────────────────────────────
+  auth-service:
+    build:
+      context: ./backend/service/auth-service
+      dockerfile: Dockerfile
+    container_name: hotel-auth-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      SERVER_PORT: 8081
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://postgres:5432/auth_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production-min32chars}
+      JWT_EXPIRY: ${JWT_EXPIRY:-86400000}
+      OTP_EXPIRY: ${OTP_EXPIRY:-300}
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-your_email@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-your_app_password}
+      SHOW_SQL: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ─── Hotel Service (8082) ─────────────────────────────────────
+  hotel-service:
+    build:
+      context: ./backend/service/hotel-service
+      dockerfile: Dockerfile
+    container_name: hotel-hotel-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+    environment:
+      SERVER_PORT: 8082
+      DB_URL: jdbc:postgresql://postgres:5432/hotel_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production-min32chars}
+      SHOW_SQL: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ─── Booking Service (8083) ───────────────────────────────────
+  booking-service:
+    build:
+      context: ./backend/service/booking-service
+      dockerfile: Dockerfile
+    container_name: hotel-booking-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    environment:
+      SERVER_PORT: 8083
+      DB_URL: jdbc:postgresql://postgres:5432/booking_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production-min32chars}
+      SHOW_SQL: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8083/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ─── Payment Service (8084) ───────────────────────────────────
+  payment-service:
+    build:
+      context: ./backend/service/payment-service
+      dockerfile: Dockerfile
+    container_name: hotel-payment-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      booking-service:
+        condition: service_healthy
+    ports:
+      - "8084:8084"
+    environment:
+      SERVER_PORT: 8084
+      DB_URL: jdbc:postgresql://postgres:5432/payment_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      BOOKING_SERVICE_URL: http://booking-service:8083
+      SHOW_SQL: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8084/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ─── API Gateway (8080) ───────────────────────────────────────
+  api-gateway:
+    build:
+      context: ./backend/service/api-gateway
+      dockerfile: Dockerfile
+    container_name: hotel-api-gateway
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      hotel-service:
+        condition: service_started
+      booking-service:
+        condition: service_started
+      payment-service:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_PORT: 8080
+      AUTH_SERVICE_URL: http://auth-service:8081
+      HOTEL_SERVICE_URL: http://hotel-service:8082
+      BOOKING_SERVICE_URL: http://booking-service:8083
+      PAYMENT_SERVICE_URL: http://payment-service:8084
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ─── Frontend (80) ────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hotel-frontend
+    restart: unless-stopped
+    depends_on:
+      - api-gateway
+    ports:
+      - "3000:80"
+
+volumes:
+  postgres_data:

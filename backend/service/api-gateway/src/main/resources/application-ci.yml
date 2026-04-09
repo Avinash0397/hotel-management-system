@@ -1,0 +1,131 @@
+#yaml-language-server: $schema=https://json.schemastore.org/azure-pipelines.json
+
+trigger:
+  - feature/backend
+
+pr:
+  - feature/backend
+
+variables:
+  MAVEN_PATH: 'C:\Users\Lenovo\apache-maven-3.9.9\bin'
+
+stages:
+
+  # ============================================================
+  # STAGE 1 — Build & Push Docker Images
+  # ============================================================
+  - stage: BuildAndPush
+    displayName: Build & Push Microservices
+    jobs:
+      - job: Build
+        displayName: Build All Services
+        pool:
+          name: Default
+
+        steps:
+          - checkout: self
+
+          # ----------------------------------------------------
+          # Validate Tools
+          # ----------------------------------------------------
+          - script: |
+              set PATH=$(MAVEN_PATH);%PATH%
+
+              echo ===== MAVEN =====
+              mvn -v
+
+              echo ===== JAVA =====
+              java -version
+
+              echo ===== DOCKER =====
+              docker --version
+            displayName: Validate Tools
+
+          # ----------------------------------------------------
+          # Build All Maven Projects
+          # ----------------------------------------------------
+          - script: |
+              set PATH=$(MAVEN_PATH);%PATH%
+
+              for %%d in (auth-service hotel-service booking-service payment-service api-gateway) do (
+                if exist "%%d\pom.xml" (
+                  echo ===== Building %%d =====
+                  mvn -f "%%d\pom.xml" clean package -DskipTests
+                )
+              )
+            displayName: Build Maven Projects
+
+          # ----------------------------------------------------
+          # Auth Service
+          # ----------------------------------------------------
+          - task: Docker@2
+            displayName: Build & Push Auth Service
+            inputs:
+              command: buildAndPush
+              containerRegistry: docker-hub-connection
+              repository: harshjswl/auth-service
+              dockerfile: auth-service/Dockerfile
+              buildContext: auth-service
+              tags: |
+                $(Build.BuildId)
+                latest
+
+          # ----------------------------------------------------
+          # Hotel Service
+          # ----------------------------------------------------
+          - task: Docker@2
+            displayName: Build & Push Hotel Service
+            inputs:
+              command: buildAndPush
+              containerRegistry: docker-hub-connection
+              repository: harshjswl/hotel-service
+              dockerfile: hotel-service/Dockerfile
+              buildContext: hotel-service
+              tags: |
+                $(Build.BuildId)
+                latest
+
+          # ----------------------------------------------------
+          # Booking Service
+          # ----------------------------------------------------
+          - task: Docker@2
+            displayName: Build & Push Booking Service
+            inputs:
+              command: buildAndPush
+              containerRegistry: docker-hub-connection
+              repository: harshjswl/booking-service
+              dockerfile: booking-service/Dockerfile
+              buildContext: booking-service
+              tags: |
+                $(Build.BuildId)
+                latest
+
+          # ----------------------------------------------------
+          # Payment Service
+          # ----------------------------------------------------
+          - task: Docker@2
+            displayName: Build & Push Payment Service
+            inputs:
+              command: buildAndPush
+              containerRegistry: docker-hub-connection
+              repository: harshjswl/payment-service
+              dockerfile: payment-service/Dockerfile
+              buildContext: payment-service
+              tags: |
+                $(Build.BuildId)
+                latest
+
+          # ----------------------------------------------------
+          # API Gateway
+          # ----------------------------------------------------
+          - task: Docker@2
+            displayName: Build & Push API Gateway
+            inputs:
+              command: buildAndPush
+              containerRegistry: docker-hub-connection
+              repository: harshjswl/api-gateway
+              dockerfile: api-gateway/Dockerfile
+              buildContext: api-gateway
+              tags: |
+                $(Build.BuildId)
+                latest

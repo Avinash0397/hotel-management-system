@@ -1,0 +1,29 @@
+server:
+  port: ${SERVER_PORT:8084}
+
+spring:
+  application:
+    name: payment-service
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: true
+
+booking:
+  service:
+    url: ${BOOKING_SERVICE_URL:http://localhost:8083}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

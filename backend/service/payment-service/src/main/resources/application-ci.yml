@@ -1,0 +1,17 @@
+server:
+  port: 8084
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:paymentdb
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+booking:
+  service:
+    url: http://localhost:8083

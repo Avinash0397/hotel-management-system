@@ -1,0 +1,124 @@
+# ─────────────────────────────────────────────
+# 🔐 ENV FILES (CRITICAL)
+# ─────────────────────────────────────────────
+.env
+.env.*
+*.env
+
+# allow only safe templates
+!.env.example
+
+# ⚠️ DO NOT allow this unless you are 100% sure
+# (remove this line to prevent production secrets leak)
+# !.env.production
+
+
+# ─────────────────────────────────────────────
+# 📦 Dependencies
+# ─────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/
+.pnpm-store/
+
+
+# ─────────────────────────────────────────────
+# 🏗 Build Output
+# ─────────────────────────────────────────────
+dist/
+dist-ssr/
+build/
+out/
+.next/
+
+
+# ─────────────────────────────────────────────
+# ⚡ Vite Cache
+# ─────────────────────────────────────────────
+.vite/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+
+# ─────────────────────────────────────────────
+# 🧪 Testing & Coverage
+# ─────────────────────────────────────────────
+coverage/
+*.lcov
+.nyc_output/
+
+
+# ─────────────────────────────────────────────
+# 📜 Logs
+# ─────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+
+# ─────────────────────────────────────────────
+# 💻 IDE & Editor
+# ─────────────────────────────────────────────
+
+## VS Code
+.vscode/
+!.vscode/extensions.json
+
+## IntelliJ / WebStorm
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+## Vim / temp
+*.sw?
+*.swp
+*.swo
+*~
+
+
+# ─────────────────────────────────────────────
+# 🖥 OS Files
+# ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+
+# ─────────────────────────────────────────────
+# 🧹 Cache & Temp
+# ─────────────────────────────────────────────
+.cache/
+*.tmp
+*.temp
+*.bak
+
+
+# ─────────────────────────────────────────────
+# 🐳 Docker
+# ─────────────────────────────────────────────
+.dockerignore
+
+
+# ─────────────────────────────────────────────
+# 🔒 Optional Security Files
+# ─────────────────────────────────────────────
+*.pem
+*.key
+*.crt
+*.p12
+
+
+# ─────────────────────────────────────────────
+# 📊 Misc
+# ─────────────────────────────────────────────
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

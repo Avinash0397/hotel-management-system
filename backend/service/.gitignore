@@ -1,0 +1,83 @@
+# ============================================================
+# All Microservices — .gitignore
+# ============================================================
+
+# ── Secrets (NEVER commit) ───────────────────────────────────
+.env
+api-gateway/.env
+auth-service/.env
+booking-service/.env
+hotel-service/.env
+payment-service/.env
+!.env.example
+
+# ── Maven build output ───────────────────────────────────────
+**/target/
+**/dependency-reduced-pom.xml
+**/pom.xml.tag
+**/pom.xml.releaseBackup
+**/pom.xml.versionsBackup
+**/pom.xml.next
+**/release.properties
+**/buildNumber.properties
+**/.mvn/timing.properties
+**/.mvn/wrapper/maven-wrapper.jar
+
+# ── Compiled output ──────────────────────────────────────────
+**/*.class
+**/*.jar
+**/*.war
+**/*.ear
+**/*.nar
+
+# ── Spring Boot profile configs with secrets ─────────────────
+**/application-local.yml
+**/application-local.properties
+**/application-prod.yml
+**/application-prod.properties
+**/application-stage.yml
+**/application-test.yml
+
+# ── IDE — IntelliJ IDEA ──────────────────────────────────────
+**/.idea/
+**/*.iml
+**/*.iws
+**/*.ipr
+
+# ── IDE — Eclipse / STS ──────────────────────────────────────
+**/.apt_generated
+**/.classpath
+**/.factorypath
+**/.project
+**/.settings/
+**/.springBeans
+**/.sts4-cache/
+
+# ── IDE — VS Code ────────────────────────────────────────────
+**/.vscode/
+
+# ── IDE — NetBeans ───────────────────────────────────────────
+**/nbproject/private/
+**/nbbuild/
+**/nbdist/
+**/.nb-gradle/
+
+# ── Logs ─────────────────────────────────────────────────────
+**/logs/
+**/*.log
+**/spring.log
+
+# ── OS files ─────────────────────────────────────────────────
+**/.DS_Store
+**/Thumbs.db
+**/desktop.ini
+
+# ── Test coverage ────────────────────────────────────────────
+**/.jacoco/
+**/jacoco.exec
+**/jacoco/
+
+# ── Temp / misc ──────────────────────────────────────────────
+**/*.tmp
+**/*.bak
+**/HELP.md

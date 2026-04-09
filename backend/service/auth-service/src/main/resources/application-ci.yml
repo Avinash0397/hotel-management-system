@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:test
+    username: sa
+    password:
+
+  mail:
+    host: localhost
+    port: 1025
+    username: test
+    password: test
+
+jwt:
+  secret: test-secret
